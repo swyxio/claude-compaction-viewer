@@ -2,6 +2,12 @@
 
 import sys
 
+# Windows defaults stdout to the system ANSI codepage (e.g. cp1252) even when
+# the terminal supports UTF-8.  Force UTF-8 so Unicode box-drawing / emoji work.
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
 
 HELP = """\
 Claude Code Compaction Viewer
