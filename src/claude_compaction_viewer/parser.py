@@ -114,6 +114,7 @@ def parse_jsonl(filepath: str) -> tuple[list[ParsedMessage], list[CompactEvent],
         content = msg.get("content", obj.get("content", ""))
         content_full = ""
         content_preview = ""
+        content_types = set()
 
         if isinstance(content, str):
             content_full = content
@@ -123,6 +124,7 @@ def parse_jsonl(filepath: str) -> tuple[list[ParsedMessage], list[CompactEvent],
             for c in content:
                 if isinstance(c, dict):
                     ctype = c.get("type", "")
+                    content_types.add(ctype)
                     if ctype == "text":
                         parts.append(c.get("text", ""))
                     elif ctype == "thinking":
@@ -148,13 +150,19 @@ def parse_jsonl(filepath: str) -> tuple[list[ParsedMessage], list[CompactEvent],
             content_preview = content_full[:120].replace("\n", " ")
 
         if msg_type == "user":
-            stats.user_messages += 1
-            if any(isinstance(c, dict) and c.get("type") == "tool_result" for c in (content if isinstance(content, list) else [])):
+            if content_types == {"tool_result"}:
+                msg_type = "tool_result"
                 stats.tool_results += 1
+            else:
+                stats.user_messages += 1
         elif msg_type == "assistant":
-            stats.assistant_messages += 1
-            if tool_name:
+            if content_types == {"tool_use"}:
+                msg_type = "tool_use"
                 stats.tool_calls += 1
+            else:
+                stats.assistant_messages += 1
+                if tool_name:
+                    stats.tool_calls += 1
         elif msg_type == "progress":
             stats.progress_messages += 1
             data = obj.get("data", {})
