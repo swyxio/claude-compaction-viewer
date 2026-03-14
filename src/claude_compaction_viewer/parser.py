@@ -66,7 +66,7 @@ def parse_jsonl(filepath: str) -> tuple[list[ParsedMessage], list[CompactEvent],
     compactions = []
     stats = ConversationStats()
 
-    with open(filepath) as f:
+    with open(filepath, encoding="utf-8", errors="replace") as f:
         lines = f.readlines()
 
     stats.total_messages = len(lines)
