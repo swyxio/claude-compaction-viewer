@@ -171,6 +171,16 @@ def parse_jsonl(filepath: str) -> tuple[list[ParsedMessage], list[CompactEvent],
             content_full = json.dumps(data, indent=2)
         elif msg_type == "system":
             stats.system_messages += 1
+            subtype = obj.get("subtype", "")
+            if subtype == "api_error":
+                err = obj.get("error", {})
+                retry = obj.get("retryAttempt", 0)
+                max_r = obj.get("maxRetries", 0)
+                content_preview = f"[api_error] {err.get('status', '?')} (retry {retry}/{max_r})"
+                content_full = json.dumps(err, indent=2)
+            elif subtype in ("stop_hook_summary", "turn_duration"):
+                msg_type = "progress"  # treat as noise
+                stats.progress_messages += 1
         elif msg_type == "file-history-snapshot":
             stats.file_snapshots += 1
 
