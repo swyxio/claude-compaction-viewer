@@ -32,6 +32,8 @@ TUI_TYPE_ICONS = {
     "assistant": "\U0001f916",
     "system": "\u2699\ufe0f",
     "progress": "\u23f3",
+    "tool_use": "\U0001f527",
+    "tool_result": "\U0001f527",
     "file-history-snapshot": "\U0001f4f8",
 }
 
@@ -40,6 +42,8 @@ ROLE_COLORS = {
     "assistant": "bold green",
     "system": "bold yellow",
     "progress": "dim",
+    "tool_use": "dim cyan",
+    "tool_result": "dim cyan",
     "file-history-snapshot": "dim magenta",
 }
 
@@ -231,7 +235,7 @@ class CompactionViewer(App):
         self._compaction_rows = []
         row_idx = 0
         for msg in self.messages:
-            if not self.show_progress_msgs and msg.msg_type == "progress":
+            if not self.show_progress_msgs and msg.msg_type in ("progress", "tool_use", "tool_result"):
                 continue
             if msg.msg_type == "file-history-snapshot":
                 continue
